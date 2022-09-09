@@ -1,17 +1,19 @@
 
 exports.up = function(knex) {
   return knex.schema.createTable('reviews', table => {
-    table.incrememnts('review_id');
+    table.increments('review_id').primary();
     table.text('content');
     table.integer('score');
+    table.integer('critic_id').unsigned().notNullable();
     table
         .foreign('critic_id')
-        .reference('critic_id')
-        .inTable('critics')
+        .references('critic_id')
+        .inTable('critics');
+    table.integer('movie_id').unsigned().notNullable();
     table
         .foreign('movie_id')
-        .reference('movie_id')
-        .inTable('movies')
+        .references('movie_id')
+        .inTable('movies');
   })
 };
 
