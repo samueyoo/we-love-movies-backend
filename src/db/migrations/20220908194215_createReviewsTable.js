@@ -8,10 +8,13 @@ exports.up = function(knex) {
         .foreign('critic_id')
         .reference('critic_id')
         .inTable('critics')
-        .onDelete('')
+    table
+        .foreign('movie_id')
+        .reference('movie_id')
+        .inTable('movies')
   })
 };
 
 exports.down = function(knex) {
-  
+  return knex.schema.dropTable('reviews');
 };
