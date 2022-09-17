@@ -1,11 +1,19 @@
 //For functions for knex to query the database
 
 const knex = require('../../db/connection');
+const mapProperties = require('../../utils/map-properties');
 
-const tableName = "movies";
+const addCritic = mapProperties({
+    critic_id: 'critics.critic_id',
+    preferred_name: 'preferred_name',
+    surname: 'critics.surname',
+    organization_name: 'critics.organization_name',
+    created_at: 'critics.created_at',
+    updated_at: 'critics.updated_at',
+})
 
 function list() {
-    return knex(tableName)
+    return knex('movies')
         .select('movie_id as id', 
             'title', 
             'runtime_in_minutes', 
@@ -67,8 +75,9 @@ function reviews(movieId) {
         'r.created_at',
         'r.updated_at',
         'r.critic_id',
-        'r.movie_id',
-        'critic',)
+        'r.movie_id')
+        .where('r.movie_id', '=', `${movieId}`)
+        .then(addCritic)
 }
 
 module.exports = {
@@ -76,4 +85,5 @@ module.exports = {
     listIsShowing,
     read,
     theaters,
+    reviews,
 }

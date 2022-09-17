@@ -31,8 +31,13 @@ async function theaters(req, res) {
     return res.json({ data: await service.theaters(movieId) })
 }
 
+async function reviews(req, res) {
+    return res.json({ data: await service.reviews(req.params.movieId) })
+}
+
 module.exports = {
     list: asyncErrorBoundary(list),
     read: [asyncErrorBoundary(validateMovieId), asyncErrorBoundary(read)],
-    theaters: [asyncErrorBoundary(validateMovieId), asyncErrorBoundary(theaters)]
+    theaters: [asyncErrorBoundary(validateMovieId), asyncErrorBoundary(theaters)],
+    reviews: [asyncErrorBoundary(reviews)],
 }
