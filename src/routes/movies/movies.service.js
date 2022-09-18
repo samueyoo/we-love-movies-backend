@@ -1,14 +1,6 @@
-//For functions for knex to query the database
-
 const knex = require('../../db/connection');
 const mapProperties = require('../../utils/map-properties');
 const reduceProperties = require('../../utils/reduce-properties');
-
-// const reduceProp = reduceProperties('critic', {
-//     return knex
-// })
-
-
 
 function list() {
     return knex('movies')
@@ -64,17 +56,18 @@ function theaters(movieId) {
         .where('mt.movie_id', '=', `${movieId}`);
 }
 
-const addCritic = mapProperties({
-    critic_id: 'critics.critic_id',
-    preferred_name: 'preferred_name',
-    surname: 'critics.surname',
-    organization_name: 'critics.organization_name',
-    created_at: 'critics.created_at',
-    updated_at: 'critics.updated_at',
-});
+//Legacy: once map-properties until function works, mapping within reviews()
+// const addCritic = mapProperties({
+//     critic_id: 'critics.critic_id',
+//     preferred_name: 'preferred_name',
+//     surname: 'critics.surname',
+//     organization_name: 'critics.organization_name',
+//     created_at: 'critics.created_at',
+//     updated_at: 'critics.updated_at',
+// });
 
-function reviews(movieId) { //Returning each matching result as object properties?
-    return knex('reviews as r')
+async function reviews(movieId) { //Returning each matching result as object properties?
+    const data = await knex('reviews as r')
         .join('critics as c', 'r.critic_id', 'c.critic_id')
         .where('r.movie_id', '=', `${movieId}`)
         .select('r.review_id',
@@ -83,9 +76,37 @@ function reviews(movieId) { //Returning each matching result as object propertie
         'r.created_at',
         'r.updated_at',
         'r.critic_id',
-        'r.movie_id')
-        .first()
-        .then(addCritic)
+        'r.movie_id',
+        'c.critic_id',
+        'c.preferred_name',
+        'c.surname',
+        'c.organization_name',
+        'c.created_at',
+        'c.updated_at',
+        )
+
+    const mapped = await data.map(review => {
+        const { review_id, content, score, created_at, updated_at, critic_id, movie_id, preferred_name, surname, organization_name } = review
+        return {
+            review_id: review_id,
+            content: content,
+            score: score,
+            created_at: created_at,
+            updated_at: updated_at,
+            critic_id: critic_id,
+            movie_id: movie_id,
+            critic: {
+                critic_id,
+                preferred_name,
+                surname,
+                organization_name,
+                created_at,
+                updated_at
+            }
+        }
+    });
+
+    return mapped;
 }
 
 module.exports = {
