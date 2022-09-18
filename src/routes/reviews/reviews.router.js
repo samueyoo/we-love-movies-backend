@@ -8,6 +8,7 @@ router.use(cors());
 router
     .route('/:reviewId')
     .put(controller.update)
+    .delete(controller.delete)
     .all(correctMethodsOnly);
 
 module.exports = router;

@@ -42,8 +42,6 @@ async function list() {
     return reduceMovies(await data);
 }
 
-
-
 module.exports = {
     list,
 }

@@ -26,14 +26,24 @@ async function validateReviewId(req, res, next) {
 async function update(req, res) {
     const reviewId = req.params.reviewId;
     const updatedReview = await service.update(req.body, reviewId);
-    return res.json({ data: updatedReview }) 
+    return res.json({ data: await service.getReview(reviewId) }) 
     //Need to adjust service file to nest critic data
+}
+
+async function destroy(req, res) {
+    const reviewId = req.params.reviewId;
+    const destroyedReview = await service.destroy(reviewId);
+    return res.sendStatus(204);
 }
 
 module.exports = {
     update: [
-        //asyncErrorBoundary(validateRequestBody), 
+        //asyncErrorBoundary(validateRequestBody), //Not needed for project requirements?
         asyncErrorBoundary(validateReviewId), 
         asyncErrorBoundary(update)
     ],
+    delete: [
+        asyncErrorBoundary(validateReviewId),
+        asyncErrorBoundary(destroy)
+    ]
 }
