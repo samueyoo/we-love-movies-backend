@@ -2,15 +2,13 @@
 
 const knex = require('../../db/connection');
 const mapProperties = require('../../utils/map-properties');
+const reduceProperties = require('../../utils/reduce-properties');
 
-const addCritic = mapProperties({
-    critic_id: 'critics.critic_id',
-    preferred_name: 'preferred_name',
-    surname: 'critics.surname',
-    organization_name: 'critics.organization_name',
-    created_at: 'critics.created_at',
-    updated_at: 'critics.updated_at',
-})
+// const reduceProp = reduceProperties('critic', {
+//     return knex
+// })
+
+
 
 function list() {
     return knex('movies')
@@ -66,9 +64,19 @@ function theaters(movieId) {
         .where('mt.movie_id', '=', `${movieId}`);
 }
 
-function reviews(movieId) {
+const addCritic = mapProperties({
+    critic_id: 'critics.critic_id',
+    preferred_name: 'preferred_name',
+    surname: 'critics.surname',
+    organization_name: 'critics.organization_name',
+    created_at: 'critics.created_at',
+    updated_at: 'critics.updated_at',
+});
+
+function reviews(movieId) { //Returning each matching result as object properties?
     return knex('reviews as r')
         .join('critics as c', 'r.critic_id', 'c.critic_id')
+        .where('r.movie_id', '=', `${movieId}`)
         .select('r.review_id',
         'r.content',
         'r.score',
@@ -76,7 +84,7 @@ function reviews(movieId) {
         'r.updated_at',
         'r.critic_id',
         'r.movie_id')
-        .where('r.movie_id', '=', `${movieId}`)
+        .first()
         .then(addCritic)
 }
 
