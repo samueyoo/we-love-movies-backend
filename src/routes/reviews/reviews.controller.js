@@ -1,7 +1,7 @@
 const service = require('./reviews.service');
 const asyncErrorBoundary = require('../../errors/asyncErrorBoundary');
 
-async function validateRequestBody(req, res, next) {
+async function validateRequestBody(req, res, next) { //Not needed for project requirements, but available if needed
     const updatedReview = await req.body;
     if (updatedReview.score && updatedReview.content) return next();
     return next({
@@ -12,7 +12,7 @@ async function validateRequestBody(req, res, next) {
 
 async function validateReviewId(req, res, next) {
     const reviewId = req.params.reviewId;
-    const reviewData = await service.getReview(reviewId);
+    const reviewData = await service.read(reviewId);
     if (reviewData) {
         res.locals.reviewData = reviewData;
         return next();
@@ -24,10 +24,17 @@ async function validateReviewId(req, res, next) {
 }
 
 async function update(req, res) {
-    const reviewId = req.params.reviewId;
-    const updatedReview = await service.update(req.body, reviewId);
-    return res.json({ data: await service.getReview(reviewId) }) 
-    //Need to adjust service file to nest critic data
+    const time = new Date().toISOString();
+    const reviewId = res.locals.reviewData.review_id;
+    const updatedReview = {
+        ...req.body.data,
+        review_id: reviewId,
+    }
+
+    await service.update(updatedReview);
+    const rawData = await service.updateCritic(reviewId)
+    const data = { ...rawData[0], created_at: time, updated_at: time }
+    res.json({ data })
 }
 
 async function destroy(req, res) {
@@ -38,7 +45,7 @@ async function destroy(req, res) {
 
 module.exports = {
     update: [
-        //asyncErrorBoundary(validateRequestBody), //Not needed for project requirements?
+        //asyncErrorBoundary(validateRequestBody), //Not needed for project requirements
         asyncErrorBoundary(validateReviewId), 
         asyncErrorBoundary(update)
     ],
